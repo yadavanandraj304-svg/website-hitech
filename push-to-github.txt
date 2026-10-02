@@ -1,0 +1,26 @@
+# Ready-to-paste commands — publish your website
+# Repo name: freebuff   |   Replace YOUR-USERNAME with your GitHub username!
+
+# 1) Go to the project folder (you are probably already here)
+cd "C:\Users\rajes\Desktop\About Me\Aanand.freebuff"
+
+# 2) Initialize git and make the first commit
+git init
+git add .
+git status          # quick look: should NOT list .env or server/data
+git commit -m "Hi-Tech Civil Design Consultancy website"
+
+# 3) Create the repo on github.com first:
+#    https://github.com/new  -> name: freebuff -> Public or Private -> Create
+#    (do NOT tick "Add a README")
+
+# 4) Connect and push  (replace YOUR-USERNAME!)
+git branch -M main
+git remote add origin https://github.com/YOUR-USERNAME/freebuff.git
+git push -u origin main
+
+# 5) Then deploy on https://render.com (see DEPLOY.md):
+#    Build Command:  npm install && npm run build
+#    Start Command:  npm start
+#    Env vars:       GMAIL_USER, GMAIL_APP_PASSWORD, HOST=0.0.0.0
+#    Disk:           mount at  server/data

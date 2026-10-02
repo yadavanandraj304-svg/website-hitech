@@ -1,0 +1,269 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ==========================================================================
+   Warm White theme — soft off-white page (#FAF9F6), white cards,
+   deep charcoal text (#1F2937), deep navy accent (#0F2C59 from logo seal)
+   ========================================================================== */
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 90px;
+}
+
+body {
+  font-family: 'Outfit', sans-serif;
+  background-color: #faf9f6;
+  color: #1f2937;
+  overflow-x: hidden;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #f0eee8;
+}
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #0f2c59, #2a4f92);
+  border-radius: 10px;
+}
+
+/* Gradient Text — navy gradient (logo seal blue) for headings */
+.gradient-text {
+  background: linear-gradient(135deg, #0f2c59, #2a4f92, #4a72bd);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.gradient-text-blue {
+  background: linear-gradient(135deg, #0f2c59, #2a4f92, #7b9bd3);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Card hover — soft neutral lift, no neon */
+.glow-border {
+  border: 1px solid #e8e5dc;
+  background: #ffffff;
+  transition: all 0.4s ease;
+}
+.glow-border:hover {
+  border-color: rgba(15, 44, 89, 0.28);
+  box-shadow: 0 14px 40px -18px rgba(15, 44, 89, 0.35);
+}
+
+.card-hover {
+  transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275),
+    box-shadow 0.4s ease, border-color 0.4s ease;
+}
+.card-hover:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 24px 50px -24px rgba(15, 44, 89, 0.35);
+}
+
+/* Primary button — deep navy from the logo seal */
+.btn-gold {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(135deg, #0f2c59, #1a3a74);
+  color: #ffffff;
+  transition: all 0.3s ease;
+  box-shadow: 0 10px 26px -12px rgba(15, 44, 89, 0.6);
+}
+.btn-gold:hover {
+  background: linear-gradient(135deg, #0b2145, #0f2c59);
+  box-shadow: 0 14px 30px -12px rgba(15, 44, 89, 0.7);
+}
+.btn-gold::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.25), transparent);
+  transition: left 0.5s ease;
+}
+.btn-gold:hover::before {
+  left: 100%;
+}
+
+/* Outline button — navy hairline */
+.btn-outline {
+  border: 1px solid rgba(15, 44, 89, 0.35);
+  color: #0f2c59;
+  transition: all 0.3s ease;
+  background: transparent;
+}
+.btn-outline:hover {
+  background: rgba(15, 44, 89, 0.06);
+  border-color: #0f2c59;
+  box-shadow: 0 8px 22px -14px rgba(15, 44, 89, 0.5);
+}
+
+/* Canvas container — rotating 3D home background */
+.canvas-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0.5;
+}
+.section-content {
+  position: relative;
+  z-index: 1;
+}
+
+/* Glass nav — frosted warm white */
+.glass-nav {
+  background: rgba(250, 249, 246, 0.85);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid #e8e5dc;
+  box-shadow: 0 8px 30px -20px rgba(15, 44, 89, 0.4);
+}
+
+/* Form inputs — white fields, charcoal text, navy focus */
+.form-input {
+  transition: all 0.3s ease;
+  border: 1px solid #e8e5dc;
+  background: #ffffff;
+  color: #1f2937;
+}
+.form-input::placeholder {
+  color: #9ca3af;
+}
+.form-input:focus {
+  border-color: #0f2c59;
+  box-shadow: 0 0 0 3px rgba(15, 44, 89, 0.12);
+  outline: none;
+}
+select.form-input option {
+  background: #ffffff;
+  color: #1f2937;
+}
+
+/* Service selector chips */
+.service-chip {
+  transition: all 0.25s ease;
+  border: 1px solid #e8e5dc;
+  background: #ffffff;
+  color: #4b5563;
+  cursor: pointer;
+}
+.service-chip:hover {
+  border-color: rgba(15, 44, 89, 0.45);
+  color: #0f2c59;
+}
+.service-chip.active {
+  border-color: #0f2c59;
+  background: rgba(15, 44, 89, 0.07);
+  color: #0f2c59;
+  font-weight: 500;
+  box-shadow: 0 4px 14px -8px rgba(15, 44, 89, 0.5);
+}
+
+/* Section title underline */
+.section-line {
+  background: linear-gradient(90deg, #0f2c59, rgba(15, 44, 89, 0));
+}
+
+/* Floating social rail */
+.float-rail {
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+
+.pulse-ring::after {
+  content: '';
+  position: absolute;
+  inset: -6px;
+  border-radius: 9999px;
+  border: 2px solid rgba(37, 211, 102, 0.6);
+  animation: ring 1.8s ease-out infinite;
+}
+@keyframes ring {
+  0% {
+    transform: scale(0.9);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1.35);
+    opacity: 0;
+  }
+}
+
+.text-balance {
+  text-wrap: balance;
+}
+
+/* Success toast — confirmation on inquiry submit */
+.inquiry-toast {
+  position: fixed;
+  top: 92px;
+  right: 24px;
+  z-index: 60;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  max-width: 380px;
+  padding: 16px 18px;
+  border-radius: 16px;
+  background: #ffffff;
+  border: 1px solid #e8e5dc;
+  box-shadow: 0 24px 60px -24px rgba(15, 44, 89, 0.45);
+}
+.inquiry-toast .toast-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 9999px;
+  flex-shrink: 0;
+  background: rgba(15, 44, 89, 0.08);
+  color: #0f2c59;
+}
+.inquiry-toast.error .toast-icon {
+  background: rgba(220, 38, 38, 0.08);
+  color: #dc2626;
+}
+.inquiry-toast h4 {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  color: #1f2937;
+  margin-bottom: 2px;
+}
+.inquiry-toast p {
+  font-size: 13px;
+  color: #4b5563;
+  line-height: 1.45;
+}
+.inquiry-toast .toast-close {
+  margin-left: auto;
+  border: none;
+  background: transparent;
+  color: #9ca3af;
+  cursor: pointer;
+  font-size: 16px;
+  line-height: 1;
+  padding: 2px;
+}
+.inquiry-toast .toast-close:hover {
+  color: #1f2937;
+}
