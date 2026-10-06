@@ -487,7 +487,7 @@ getSettings()
 
 // Bind to all interfaces in production (RENDER/RAILWAY/FLY_IO set these; on
 // your PC it stays localhost-only).
-const HOST = process.env.HOST || '127.0.0.1'
+const HOST = process.env.HOST || '0.0.0.0'
 
 app.listen(PORT, HOST, () => {
   console.log(`Hitech inquiry API listening on http://${HOST}:${PORT}`)
