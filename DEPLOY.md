@@ -14,8 +14,12 @@ package.json + package-lock.json
 
 Already done for you:
 - `npm run build` works → `dist/` is generated and the server serves it ✅
-- The server binds to `0.0.0.0` on hosts like Render/Railway/Fly (via `HOST` env) and
-  stays localhost-only on your own PC ✅
+- On Render/Railway/Fly/Heroku the server **automatically** binds `0.0.0.0` and uses
+  the host's injected `PORT` (Render default 10000) — you do NOT need to set `HOST`.
+  On your own PC it stays localhost-only (`127.0.0.1:3001`) ✅
+- Email: set `GMAIL_USER` + `GMAIL_APP_PASSWORD` (recommended), or any provider via
+  `SMTP_HOST` + `SMTP_PORT` + `SMTP_USER` + `SMTP_PASS`. Missing credentials never
+  crash the server — inquiries are still saved and visible in the dashboard ✅
 
 ---
 
@@ -26,7 +30,8 @@ Already done for you:
 3. Settings:
    - **Build Command:** `npm install && npm run build`
    - **Start Command:** `npm start`
-   - **Environment variables:** add `GMAIL_USER`, `GMAIL_APP_PASSWORD`, and `HOST=0.0.0.0`
+   - **Environment variables:** add `GMAIL_USER` and `GMAIL_APP_PASSWORD`
+     (do NOT add `HOST` or `PORT` — Render's values are picked up automatically)
    - **Disk** (important!): mount a disk at `server/data` so inquiries survive restarts
 4. Deploy → you get a URL like `https://hitech-civil.onrender.com` — open it in Chrome anywhere in the world 🎉
 

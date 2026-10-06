@@ -8,3 +8,4 @@ server/data/
 *.log
 .freebuff/
 infisical-login.ps1
+github/

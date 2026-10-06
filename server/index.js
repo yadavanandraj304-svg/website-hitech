@@ -46,9 +46,29 @@ const SETTINGS_FILE = path.join(DATA_DIR, 'settings.json')
 const REVIEWS_FILE = path.join(DATA_DIR, 'reviews.json')
 const PROJECTS_FILE = path.join(DATA_DIR, 'projects.json')
 
-// Some hosts export a placeholder PORT=0 — treat anything invalid as 3001.
+// --- server binding ---------------------------------------------------------
+// Cloud hosts (Render, Railway, Fly.io, Heroku…) inject PORT and require the
+// server to listen on 0.0.0.0 to be reachable from the internet. Locally we
+// keep 127.0.0.1:3001 so the Vite dev proxy (5173 → 3001) keeps working.
+const IS_CLOUD_HOST = Boolean(
+  process.env.RENDER ||
+    process.env.RENDER_SERVICE_ID ||
+    process.env.RENDER_EXTERNAL_URL ||
+    process.env.DYNO || // Heroku
+    process.env.FLY_MACHINE_ID || // Fly.io
+    process.env.RAILWAY_ENVIRONMENT_NAME || // Railway
+    process.env.NODE_ENV === 'production'
+)
+// Some hosts export a placeholder PORT=0 — treat anything invalid as the
+// platform default (Render uses 10000; local dev stays on 3001).
 const parsedPort = Number.parseInt(process.env.PORT, 10)
-const PORT = Number.isInteger(parsedPort) && parsedPort > 0 ? parsedPort : 3001
+const PORT =
+  Number.isInteger(parsedPort) && parsedPort > 0
+    ? parsedPort
+    : IS_CLOUD_HOST
+      ? 10000
+      : 3001
+const HOST = process.env.HOST || (IS_CLOUD_HOST ? '0.0.0.0' : '127.0.0.1')
 const OWNER_EMAIL = process.env.OWNER_EMAIL || 'hitechrajesh2023@gmail.com'
 const GMAIL_USER = process.env.GMAIL_USER || ''
 const GMAIL_APP_PASSWORD = process.env.GMAIL_APP_PASSWORD || ''
@@ -215,13 +235,65 @@ function requireAdmin(req, res, next) {
 
 // --- email ------------------------------------------------------------------
 
-const mailer =
-  GMAIL_USER && GMAIL_APP_PASSWORD
-    ? nodemailer.createTransport({
-        service: 'gmail',
-        auth: { user: GMAIL_USER, pass: GMAIL_APP_PASSWORD },
-      })
-    : null
+// Mail config, first match wins:
+//   1. Generic SMTP: SMTP_HOST + SMTP_PORT (default 587) + optional SMTP_USER/SMTP_PASS
+//   2. Gmail App Password: GMAIL_USER + GMAIL_APP_PASSWORD (recommended)
+// Missing credentials NEVER crash the server — inquiries are always saved to
+// disk and visible in the admin dashboard; only the email step is skipped.
+const SMTP_HOST = process.env.SMTP_HOST || ''
+const SMTP_PORT = Number.parseInt(process.env.SMTP_PORT || '', 10) || 587
+const SMTP_USER = process.env.SMTP_USER || process.env.SMTP_USERNAME || ''
+const SMTP_PASS = process.env.SMTP_PASS || process.env.SMTP_PASSWORD || ''
+
+function buildMailer() {
+  if (SMTP_HOST) {
+    return nodemailer.createTransport({
+      host: SMTP_HOST,
+      port: SMTP_PORT,
+      secure: SMTP_PORT === 465,
+      ...(SMTP_USER && SMTP_PASS ? { auth: { user: SMTP_USER, pass: SMTP_PASS } } : {}),
+    })
+  }
+  if (GMAIL_USER && GMAIL_APP_PASSWORD) {
+    return nodemailer.createTransport({
+      service: 'gmail',
+      auth: { user: GMAIL_USER, pass: GMAIL_APP_PASSWORD },
+    })
+  }
+  return null
+}
+
+const mailer = (() => {
+  try {
+    return buildMailer()
+  } catch (err) {
+    console.warn('[mail] could not create SMTP transport — continuing without email:', err.message)
+    return null
+  }
+})()
+
+if (!mailer) {
+  const missing = []
+  if (GMAIL_USER && !GMAIL_APP_PASSWORD) missing.push('GMAIL_APP_PASSWORD (GMAIL_USER is set)')
+  if (SMTP_HOST && !(SMTP_USER && SMTP_PASS)) missing.push('SMTP_USER/SMTP_PASS (SMTP_HOST is set)')
+  console.warn(
+    '[mail] SMTP not configured' +
+      (missing.length
+        ? ` — missing ${missing.join(' and ')}`
+        : ' — set GMAIL_USER + GMAIL_APP_PASSWORD, or SMTP_HOST + SMTP_PORT + SMTP_USER + SMTP_PASS') +
+      '. The website still works: inquiries are saved and shown in the admin dashboard, just not emailed.'
+  )
+} else if (!SMTP_PASS && !GMAIL_APP_PASSWORD) {
+  console.warn('[mail] SMTP transport has no password — outgoing email will be rejected by the mail server.')
+} else {
+  // Non-blocking check: report SMTP health at boot without ever crashing.
+  mailer.verify().then(
+    () => console.log(`[mail] SMTP ready (${SMTP_HOST || 'smtp.gmail.com'} as ${SMTP_USER || GMAIL_USER})`),
+    (err) => console.warn('[mail] SMTP check failed — will retry on the first inquiry:', err.message)
+  )
+}
+
+const MAIL_FROM = SMTP_HOST ? SMTP_USER || GMAIL_USER || OWNER_EMAIL : GMAIL_USER
 
 async function sendInquiryEmail(data) {
   if (!mailer) return { sent: false, reason: 'SMTP not configured' }
@@ -243,11 +315,11 @@ async function sendInquiryEmail(data) {
   ].join('\n')
 
   await mailer.sendMail({
-    from: `"${data.name}" <${GMAIL_USER}>`,
+    from: `"${data.name}" <${MAIL_FROM}>`,
     // Delivery target is the admin-editable "Email address" (Settings → Contact),
     // falling back to OWNER_EMAIL from the environment.
     to: getSettings().contact.email || OWNER_EMAIL,
-    replyTo: data.email || GMAIL_USER,
+    replyTo: data.email || MAIL_FROM,
     subject: `New inquiry: ${services} — ${data.name}`,
     text,
   })
@@ -485,15 +557,14 @@ ensure(REVIEWS_FILE, [])
 ensure(PROJECTS_FILE, [])
 getSettings()
 
-// Bind to all interfaces in production (RENDER/RAILWAY/FLY_IO set these; on
-// your PC it stays localhost-only).
-const HOST = process.env.HOST || '127.0.0.1'
-
 app.listen(PORT, HOST, () => {
   console.log(`Hitech inquiry API listening on http://${HOST}:${PORT}`)
   if (fs.existsSync(path.join(DIST_DIR, 'index.html'))) {
     console.log('  serving the built website from dist/')
   }
-  console.log(`  email → ${getSettings().contact.email || OWNER_EMAIL} ${mailer ? '(Gmail SMTP configured)' : '(SMTP not configured — inquiries saved to disk only)'}`)
+  if (process.env.RENDER_EXTERNAL_URL) {
+    console.log(`  public URL: ${process.env.RENDER_EXTERNAL_URL}`)
+  }
+  console.log(`  email → ${getSettings().contact.email || OWNER_EMAIL} ${mailer ? '(SMTP configured)' : '(SMTP not configured — inquiries saved to disk only)'}`)
   console.log(`  admins → ${ADMIN_EMAILS.join(', ')}`)
 })

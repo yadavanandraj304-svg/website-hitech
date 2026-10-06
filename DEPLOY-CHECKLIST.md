@@ -26,7 +26,7 @@
 - [ ] Environment (Advanced → Add Environment Variable):
   - `GMAIL_USER` = your Gmail address
   - `GMAIL_APP_PASSWORD` = your 16-char App Password (never your normal password)
-  - `HOST` = `0.0.0.0`
+  - (no `HOST` or `PORT` needed — the server auto-detects Render and binds 0.0.0.0)
 - [ ] Disks → Add Disk: name `data`, Mount Path `server/data`, 1 GB
 - [ ] Create Web Service → wait ~5 min for "Live"
 
