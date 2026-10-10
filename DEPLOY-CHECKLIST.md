@@ -27,10 +27,16 @@
   - `GMAIL_USER` = your Gmail address
   - `GMAIL_APP_PASSWORD` = your 16-char App Password (never your normal password)
   - (no `HOST` or `PORT` needed — the server auto-detects Render and binds 0.0.0.0)
-- [ ] Disks → Add Disk: name `data`, Mount Path `server/data`, 1 GB
+- ⚠️ **Do NOT add a Disk yet** — Persistent Disks are *not available on the Free plan* and
+  adding one forces Render to ask for a credit card. Skip this step; the service keeps
+  data in the container's local `server/data` folder instead (see Step 3 for the caveat).
 - [ ] Create Web Service → wait ~5 min for "Live"
 
 ## Step 3 — Your URLs (fill in after deploy)
+⚠️ **Free plan caveat:** settings/projects/leads live in the service's local storage, so a free
+service restart (idle sleep-wake or redeploy) can reset them. **Every inquiry is emailed to
+you the moment it arrives, so no customer lead is ever lost.** Settings/projects/photos can be
+re-entered in 5 minutes after a reset — or move to the $7/month plan later for a persistent Disk.
 - Website: `https://______________.onrender.com`
 - Admin dashboard: `https://______________.onrender.com/#/admin`
 

@@ -549,6 +549,19 @@ app.delete('/api/projects/:id', requireAdmin, (req, res) => {
   res.json({ ok: true })
 })
 
+// --- SPA fallback (after every route above) ----------------------------------
+// The app uses hash routes (#/admin), so this only matters when someone types
+// /admin or /inquiries directly — give them the app shell instead of a 404.
+// Only outside dist/ exists and only for non-API GETs.
+if (fs.existsSync(path.join(DIST_DIR, 'index.html'))) {
+  app.use((req, res, next) => {
+    if (req.method === 'GET' && !req.path.startsWith('/api/')) {
+      return res.sendFile(path.join(DIST_DIR, 'index.html'))
+    }
+    next()
+  })
+}
+
 // --- boot -------------------------------------------------------------------
 
 ensure(INQUIRIES_FILE, [])
